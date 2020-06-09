@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
-class FirstFragment : Fragment(), OnItemLongClickListener {
+class FirstFragment : BaseFragment(), OnItemLongClickListener {
     private val baseUrl = "https://t66y.com/index.php"
     private lateinit var getDataJob: Job
     private val handling = AtomicBoolean(false)
@@ -37,6 +37,7 @@ class FirstFragment : Fragment(), OnItemLongClickListener {
     private var showLimit = 100
     private var commentsLimit = 3
     lateinit var myAdapter: MyAdapter
+    private var showErrorTime = 0
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -55,8 +56,20 @@ class FirstFragment : Fragment(), OnItemLongClickListener {
         recyclerview.adapter = myAdapter
         recyclerview.layoutManager = LinearLayoutManager(context)
         btn_refresh.setOnClickListener { refreshData() }
-        et_comments_limit.addTextChangedListener { commentsLimit = it!!.toString().toInt() }
-        et_show_limit.addTextChangedListener { showLimit = it!!.toString().toInt() }
+        et_comments_limit.addTextChangedListener {
+            it?.let { t ->
+                if (it.toString().isEmpty())
+                    return@let
+                commentsLimit = t.toString().toInt()
+            }
+        }
+        et_show_limit.addTextChangedListener {
+            it?.let { r ->
+                if (r.toString().isEmpty())
+                    return@let
+                showLimit = r.toString().toInt()
+            }
+        }
         getData()
     }
 
@@ -94,6 +107,15 @@ class FirstFragment : Fragment(), OnItemLongClickListener {
                 e.printStackTrace()
                 launch(Dispatchers.Main) { progress.visibility = View.GONE }
                 handling.compareAndSet(true, false)
+                val args = Bundle()
+                args.putString(Constants.ARG_ERROR_MESSAGE, e.toString())
+                if (showErrorTime < 3) {
+                    findNavController().navigate(
+                        R.id.action_FirstFragment_to_errorPageFragment,
+                        args
+                    )
+                    showErrorTime++
+                }
             }
         }
     }
