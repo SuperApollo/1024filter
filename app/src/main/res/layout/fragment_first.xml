@@ -28,13 +28,39 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textview_first" />
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/tv_info"
-        android:paddingHorizontal="5dp"
-        android:layout_width="match_parent"
+    <EditText
+        android:id="@+id/et_comments_limit"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:hint="评论数"
+        android:inputType="number"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/et_show_limit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="最大展示数"
+        android:inputType="number"
+        app:layout_constraintLeft_toRightOf="@+id/et_comments_limit"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="5dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/et_comments_limit" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_total_item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="5dp"
+        app:layout_constraintLeft_toRightOf="@+id/tv_info"
+        app:layout_constraintTop_toTopOf="@+id/tv_info" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"

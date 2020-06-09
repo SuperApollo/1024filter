@@ -4,12 +4,14 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -32,7 +34,7 @@ class FirstFragment : Fragment(), OnItemLongClickListener {
     private val handling = AtomicBoolean(false)
     private var currentPage = 0
     private val onlineBeans: MutableList<OnlineBean> = mutableListOf()
-    private var maxItems = 10
+    private var showLimit = 100
     private var commentsLimit = 3
     lateinit var myAdapter: MyAdapter
     override fun onCreateView(
@@ -53,12 +55,16 @@ class FirstFragment : Fragment(), OnItemLongClickListener {
         recyclerview.adapter = myAdapter
         recyclerview.layoutManager = LinearLayoutManager(context)
         btn_refresh.setOnClickListener { refreshData() }
+        et_comments_limit.addTextChangedListener { commentsLimit = it!!.toString().toInt() }
+        et_show_limit.addTextChangedListener { showLimit = it!!.toString().toInt() }
         getData()
     }
 
     private fun refreshData() {
         release()
         onlineBeans.clear()
+        currentPage = 0
+        refreshShow()
         getData()
     }
 
@@ -94,10 +100,10 @@ class FirstFragment : Fragment(), OnItemLongClickListener {
 
     private fun parseOnlineVideoPage(absHref: String) {
         while (true) {
-            if (onlineBeans.size > maxItems) {
+            if (getDataJob.isCancelled) {
                 break
             }
-            if (getDataJob.isCancelled) {
+            if (onlineBeans.size > showLimit) {
                 break
             }
             currentPage++
@@ -115,6 +121,12 @@ class FirstFragment : Fragment(), OnItemLongClickListener {
         try {
             var index = -1
             while (true) {
+                if (getDataJob.isCancelled) {
+                    break
+                }
+                if (onlineBeans.size > showLimit) {
+                    break
+                }
                 index++
                 val firstItem = realList.child(9 + index)
                 val tal = firstItem.child(1)
@@ -128,7 +140,11 @@ class FirstFragment : Fragment(), OnItemLongClickListener {
                 val name = h3.text()
                 val onlineBean = OnlineBean(name, url, responseCount.toString())
                 onlineBeans.add(onlineBean)
-                GlobalScope.launch(Dispatchers.Main) { myAdapter.notifyDataSetChanged() }
+                onlineBeans.sortBy { it.comments }
+                onlineBeans.reverse()
+                GlobalScope.launch(Dispatchers.Main) {
+                    refreshShow()
+                }
                 Log.d("apollo", name + url)
 
 
@@ -138,6 +154,11 @@ class FirstFragment : Fragment(), OnItemLongClickListener {
             e.printStackTrace()
         }
 
+    }
+
+    private fun refreshShow() {
+        myAdapter.notifyDataSetChanged()
+        tv_total_item.text = "共搜索到 ${onlineBeans.size} 条数据,第 $currentPage 页"
     }
 
     override fun onDestroy() {
