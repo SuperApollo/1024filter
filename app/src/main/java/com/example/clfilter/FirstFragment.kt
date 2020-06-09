@@ -70,6 +70,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
                 showLimit = r.toString().toInt()
             }
         }
+        btn_to_91.setOnClickListener { findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment) }
         getData()
     }
 
@@ -102,14 +103,14 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
                 val link = target.select("a").first()
                 val absHref = link.attr("abs:href")
                 parseOnlineVideoPage(absHref)
-                launch(Dispatchers.Main) { progress.visibility = View.GONE }
+                launch(Dispatchers.Main) { progress?.visibility = View.GONE }
             } catch (e: Exception) {
                 e.printStackTrace()
-                launch(Dispatchers.Main) { progress.visibility = View.GONE }
+                launch(Dispatchers.Main) { progress?.visibility = View.GONE }
                 handling.compareAndSet(true, false)
                 val args = Bundle()
                 args.putString(Constants.ARG_ERROR_MESSAGE, e.toString())
-                if (showErrorTime < 3) {
+                if (showErrorTime < 2) {
                     findNavController().navigate(
                         R.id.action_FirstFragment_to_errorPageFragment,
                         args
