@@ -9,8 +9,12 @@ open class BaseActivity : AppCompatActivity() {
         val fragment = supportFragmentManager.fragments.find {
             it.isVisible
         }
+        var popBackStack = false
         if (fragment != null && fragment is NavHostFragment) {
-            fragment.findNavController().popBackStack()
+            popBackStack = fragment.findNavController().popBackStack()
+        }
+        if (!popBackStack) {
+            super.onBackPressed()
         }
     }
 }
