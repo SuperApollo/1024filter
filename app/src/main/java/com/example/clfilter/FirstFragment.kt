@@ -35,7 +35,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
     private var currentPage = 0
     private val onlineBeans: MutableList<OnlineBean> = mutableListOf()
     private var showLimit = 100
-    private var commentsLimit = 3
+    private var commentsLimit = 0
     lateinit var myAdapter: MyAdapter
     private var showErrorTime = 0
     val my_headers = arrayOf(
@@ -85,6 +85,10 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
                     return@let
                 showLimit = r.toString().toInt()
             }
+        }
+        swipe.setOnRefreshListener {
+            refreshData()
+            swipe.isRefreshing = false
         }
         btn_to_91.setOnClickListener { findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment) }
         getData()
@@ -192,9 +196,13 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
                 if (responseCount < commentsLimit) {
                     continue
                 }
+
                 val h3 = tal.child(0)
                 val url = h3.select("a").first().attr("abs:href")
                 val name = h3.text()
+                if (et_key_words.text != null && !name.contains(et_key_words.text)) {
+                    continue
+                }
                 val onlineBean = OnlineBean(name, url, responseCount.toString())
                 onlineBeans.add(onlineBean)
                 onlineBeans.sortBy { it.comments }
