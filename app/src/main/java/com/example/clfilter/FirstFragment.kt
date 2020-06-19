@@ -92,6 +92,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
         }
         btn_to_91.setOnClickListener { findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment) }
         getData()
+        Log.d("apollo","commit 1")
     }
 
     private fun refreshData() {
