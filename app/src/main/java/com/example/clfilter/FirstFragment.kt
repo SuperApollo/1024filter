@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class FirstFragment : BaseFragment(), OnItemLongClickListener {
     private val baseUrl = "https://t66y.com/index.php"
-    private lateinit var getDataJob: Job
+    private var getDataJob: Job? = null
     private val handling = AtomicBoolean(false)
     private var currentPage = 0
     private val onlineBeans: MutableList<OnlineBean> = mutableListOf()
@@ -157,7 +157,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
                 val topics = onlineVideo.child(2).getElementsByClass("f12")
                 val articles = onlineVideo.child(3).getElementsByClass("f12")
                 launch(Dispatchers.Main) {
-                    tv_info.text = "主题: ${topics.text()}, 文章: ${articles.text()}"
+                    tv_info?.text = "主题: ${topics.text()}, 文章: ${articles.text()}"
                 }
                 val link = target.select("a").first()
                 val absHref = link.attr("abs:href")
@@ -182,7 +182,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
 
     private suspend fun parseOnlineVideoPage(absHref: String) {
         while (true) {
-            if (getDataJob.isCancelled) {
+            if (getDataJob == null || getDataJob!!.isCancelled) {
                 break
             }
             if (onlineBeans.size > showLimit) {
@@ -219,7 +219,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
         try {
             var index = -1
             while (true) {
-                if (getDataJob.isCancelled) {
+                if (getDataJob == null || getDataJob!!.isCancelled) {
                     break
                 }
                 if (onlineBeans.size > showLimit) {
@@ -243,7 +243,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
                 val h3 = tal.child(0)
                 val url = h3.select("a").first().attr("abs:href")
                 val name = h3.text()
-                if (et_key_words.text != null && !name.contains(et_key_words.text)) {
+                if (et_key_words?.text != null && !name.contains(et_key_words.text)) {
                     continue
                 }
                 val onlineBean = OnlineBean(name, url, responseCount.toString())
@@ -266,7 +266,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
 
     private fun refreshShow() {
         myAdapter.notifyDataSetChanged()
-        tv_total_item.text = "共搜索到 ${onlineBeans.size} 条数据,第 $currentPage 页"
+        tv_total_item?.text = "共搜索到 ${onlineBeans.size} 条数据,第 $currentPage 页"
     }
 
     override fun onDestroy() {
@@ -275,11 +275,12 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
     }
 
     private fun release() {
-        if (!this::getDataJob.isInitialized) {
+        if (getDataJob == null) {
             return
         }
-        if (getDataJob.isActive && !getDataJob.isCancelled) {
-            getDataJob.cancel()
+        if (getDataJob!!.isActive && !getDataJob!!.isCancelled) {
+            getDataJob!!.cancel()
+            getDataJob = null
         }
     }
 
