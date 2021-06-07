@@ -4,18 +4,19 @@ import android.app.Service
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.pm.ConfigurationInfo
 import android.os.Bundle
 import android.os.Vibrator
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.clfilter.db.DbHelper
 import kotlinx.android.synthetic.main.fragment_first.*
 import kotlinx.coroutines.*
 import org.jsoup.Jsoup
@@ -105,7 +106,10 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
         myAdapter = MyAdapter(this, onlineBeans)
         recyclerview.adapter = myAdapter
         recyclerview.layoutManager = LinearLayoutManager(context)
-        btn_refresh.setOnClickListener { refreshData(true) }
+        btn_refresh.setOnClickListener {
+            hideKeyboard()
+            refreshData(true)
+        }
         et_comments_limit.addTextChangedListener {
             it?.let { t ->
                 if (it.toString().isEmpty())
@@ -125,8 +129,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
             swipe.isRefreshing = false
         }
         btn_to_91.setOnClickListener { findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment) }
-//        getData()
-        Log.d("apollo", "commit 1")
+        getLocalData()
     }
 
     private fun refreshData(add: Boolean) {
@@ -137,6 +140,21 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
         currentPage = 0
         refreshShow()
         getData()
+    }
+
+    private fun getLocalData() {
+        GlobalScope.launch(Dispatchers.IO) {
+            //获取本地记录
+            val savedList = DbHelper.getInstance(context).database().onlineBeanDao().selectAll()
+            Log.d("apollo", "localData: $savedList")
+            if (savedList.isNotEmpty()) {
+                onlineBeans.addAll(savedList)
+                launch(Dispatchers.Main) {
+                    myAdapter.notifyDataSetChanged()
+                    tv_total_item?.text = "历史记录：${onlineBeans.size}条"
+                }
+            }
+        }
     }
 
     private fun getData() {
@@ -170,12 +188,16 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
                 launch(Dispatchers.Main) { progress?.visibility = View.GONE }
                 val args = Bundle()
                 args.putString(Constants.ARG_ERROR_MESSAGE, e.toString())
-                if (showErrorTime < 2) {
-                    findNavController().navigate(
-                        R.id.action_FirstFragment_to_errorPageFragment,
-                        args
-                    )
-                    showErrorTime++
+                try {
+                    if (showErrorTime < 2) {
+                        findNavController().navigate(
+                            R.id.action_FirstFragment_to_errorPageFragment,
+                            args
+                        )
+                        showErrorTime++
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             } finally {
                 handling.compareAndSet(true, false)
@@ -188,7 +210,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
             if (getDataJob == null || getDataJob!!.isCancelled) {
                 break
             }
-            if (onlineBeans.size > showLimit) {
+            if (onlineBeans.size >= showLimit) {
                 break
             }
             currentPage++
@@ -250,10 +272,15 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
                 if (et_key_words?.text != null && !name.contains(et_key_words.text)) {
                     continue
                 }
-                val onlineBean = OnlineBean(name, url, responseCount.toString())
+                val onlineBean = OnlineBean()
+                onlineBean.name = name
+                onlineBean.url = url
+                onlineBean.comments = responseCount.toString()
                 onlineBeans.add(onlineBean)
+                onlineBeans.toSet().toMutableList()
                 onlineBeans.sortBy { it.comments }
                 onlineBeans.reverse()
+                DbHelper.getInstance(context).database().onlineBeanDao().saveOrUpdate(onlineBean)
                 GlobalScope.launch(Dispatchers.Main) {
                     refreshShow()
                 }
@@ -290,7 +317,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
     }
 
     override fun onItemLongClick(position: Int, item: OnlineBean) {
-        copy(item.url)
+        copy(item.url!!)
         ToastUtil.s(context, "复制成功!")
         vibrate()
     }
@@ -314,6 +341,15 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
 
         // 把数据集设置（复制）到剪贴板
         clipboard?.setPrimaryClip(clipData)
+    }
+
+    private fun hideKeyboard() {
+        val imm: InputMethodManager =
+            requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        // 隐藏软键盘
+        // 隐藏软键盘
+        imm.hideSoftInputFromWindow(requireActivity().window.decorView.windowToken, 0)
+
     }
 
 }
