@@ -146,7 +146,9 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
         GlobalScope.launch(Dispatchers.IO) {
             //获取本地记录
             val savedList = DbHelper.getInstance(context).database().onlineBeanDao().selectAll()
-            Log.d("apollo", "localData: $savedList")
+            savedList.forEach {
+                Log.d("apollo", "id:$it.id")
+            }
             if (savedList.isNotEmpty()) {
                 onlineBeans.addAll(savedList)
                 launch(Dispatchers.Main) {
@@ -225,6 +227,9 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
             val listElement = main.child(5).child(0)
             val realList = listElement.child(1)
             parseLine(realList)
+            GlobalScope.launch(Dispatchers.Main) {
+                tv_total_item?.text = "共搜索到 ${onlineBeans.size} 条数据,第 $currentPage 页"
+            }
             val time = delayTimes.random()
             delay(time)
         }
