@@ -32,7 +32,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
     private val handling = AtomicBoolean(false)
     private var currentPage = 0
     private val onlineBeans: MutableList<OnlineBean> = mutableListOf()
-    private var showLimit = 100
+    private var showLimit = 10
     private var commentsLimit = 3
     lateinit var myAdapter: MyAdapter
     private var showErrorTime = 0
@@ -86,6 +86,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
         "Mozilla/5.0 (X11; U; Linux x86_64; zh-CN; rv:1.9.2.10) Gecko/20100922 Ubuntu/10.10 (maverick) Firefox/3.6.10"
     )
     private val delayTimes = arrayOf(1000L, 2000L, 3000L)
+    private var run = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -161,12 +162,12 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
                 }
                 val link = target.select("a").first()
                 val absHref = link.attr("abs:href")
+                run = true
                 parseOnlineVideoPage(absHref)
                 launch(Dispatchers.Main) { progress?.visibility = View.GONE }
             } catch (e: Exception) {
                 e.printStackTrace()
                 launch(Dispatchers.Main) { progress?.visibility = View.GONE }
-                handling.compareAndSet(true, false)
                 val args = Bundle()
                 args.putString(Constants.ARG_ERROR_MESSAGE, e.toString())
                 if (showErrorTime < 2) {
@@ -176,12 +177,14 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
                     )
                     showErrorTime++
                 }
+            } finally {
+                handling.compareAndSet(true, false)
             }
         }
     }
 
     private suspend fun parseOnlineVideoPage(absHref: String) {
-        while (true) {
+        while (run) {
             if (getDataJob == null || getDataJob!!.isCancelled) {
                 break
             }
@@ -191,12 +194,13 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
             currentPage++
             Log.d("apollo", "currentPage: $currentPage")
             val pageUrl = "$absHref&search=&page=$currentPage"
+            Log.d("apollo", "pageUrl:$pageUrl")
             val page = Jsoup.connect(pageUrl)
                 .headers(getHeaders())
                 .get()
                 .body()
             val main = page.getElementById("main")
-            val listElement = main.child(4).child(0)
+            val listElement = main.child(5).child(0)
             val realList = listElement.child(1)
             parseLine(realList)
             val time = delayTimes.random()
@@ -218,7 +222,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
     private fun parseLine(realList: Element) {
         try {
             var index = -1
-            while (true) {
+            while (run) {
                 if (getDataJob == null || getDataJob!!.isCancelled) {
                     break
                 }
@@ -226,10 +230,10 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
                     break
                 }
                 index++
-                if (realList.childrenSize() < (10 + index)) {
-                    continue
+                if (index > realList.childrenSize() - 1) {
+                    break
                 }
-                val firstItem = realList.child(9 + index)
+                val firstItem = realList.child(index)
                 if (firstItem.childrenSize() < 2) {
                     continue
                 }
@@ -275,6 +279,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
     }
 
     private fun release() {
+        run = false
         if (getDataJob == null) {
             return
         }
