@@ -188,7 +188,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
                 val args = Bundle()
                 args.putString(Constants.ARG_ERROR_MESSAGE, e.toString())
                 try {
-                    if (showErrorTime < 2) {
+                    if (showErrorTime < 2 && run) {
                         findNavController().navigate(
                             R.id.action_FirstFragment_to_errorPageFragment,
                             args
