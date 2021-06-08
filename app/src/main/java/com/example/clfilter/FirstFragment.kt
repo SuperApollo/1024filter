@@ -201,7 +201,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener, ItemLongClickList
                 if (getDataJob == null || getDataJob!!.isCancelled) {
                     break
                 }
-                if (onlineBeans.size > Params.showLimit) {
+                if (onlineBeans.size >= Params.showLimit) {
                     break
                 }
                 index++
@@ -274,31 +274,10 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener, ItemLongClickList
         }
     }
 
-    override fun onItemLongClick(position: Int, item: OnlineBean) {
-        copy(item.url!!)
+    override fun onItemLongClick(position: Int, bean: OnlineBean) {
+        copy(bean.url!!)
         ToastUtil.s(context, "复制成功!")
         vibrate()
-    }
-
-    private fun vibrate() {
-        val vib = requireContext().getSystemService(Service.VIBRATOR_SERVICE) as Vibrator
-        vib.vibrate(50)
-    }
-
-    //复制
-    private fun copy(data: String) {
-        // 获取系统剪贴板
-        val clipboard: ClipboardManager? =
-            context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-        // 创建一个剪贴数据集，包含一个普通文本数据条目（需要复制的数据）,其他的还有
-        // newHtmlText、
-        // newIntent、
-        // newUri、
-        // newRawUri
-        val clipData = ClipData.newPlainText(null, data)
-
-        // 把数据集设置（复制）到剪贴板
-        clipboard?.setPrimaryClip(clipData)
     }
 
 }

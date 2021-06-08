@@ -207,7 +207,7 @@ class SecondFragment : BaseFragment(), ItemLongClickListener {
                 if (getDataJob == null || getDataJob!!.isCancelled) {
                     break
                 }
-                if (onlineBeans.size > Params.showLimit) {
+                if (onlineBeans.size >= Params.showLimit) {
                     break
                 }
                 index++
@@ -242,7 +242,7 @@ class SecondFragment : BaseFragment(), ItemLongClickListener {
                     continue
                 }
                 onlineBeans.add(onlineBean)
-                onlineBeans.sortBy { it.comments }
+                onlineBeans.sortBy { it.createTime }
                 onlineBeans.reverse()
                 DbHelper.getInstance(context).database().onlineBeanDao().saveOrUpdate(onlineBean)
                 GlobalScope.launch(Dispatchers.Main) {
@@ -265,6 +265,8 @@ class SecondFragment : BaseFragment(), ItemLongClickListener {
     }
 
     override fun onItemLongClick(position: Int, bean: OnlineBean) {
-
+        copy(bean.url!!)
+        ToastUtil.s(context, "复制成功!")
+        vibrate()
     }
 }
