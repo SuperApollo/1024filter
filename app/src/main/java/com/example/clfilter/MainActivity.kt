@@ -1,12 +1,20 @@
 package com.example.clfilter
 
+import android.content.pm.PackageManager
 import android.os.Bundle
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatActivity
+import android.os.Environment
+import android.os.FileUtils
 import android.view.Menu
 import android.view.MenuItem
-import androidx.navigation.findNavController
+import androidx.core.app.ActivityCompat
+import com.example.clfilter.db.DbHelper
+import com.example.clfilter.utils.FileUtil
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.io.File
 
 class MainActivity : BaseActivity() {
 
@@ -17,8 +25,9 @@ class MainActivity : BaseActivity() {
 
         findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+                .setAction("Action", null).show()
         }
+        verifyStoragePermissions()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -33,8 +42,65 @@ class MainActivity : BaseActivity() {
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
             R.id.action_settings -> true
+            R.id.action_export_txt -> {
+                exportTxt()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
+    private fun exportTxt() {
+        GlobalScope.launch(Dispatchers.IO) {
+            val path =
+                this@MainActivity.getExternalFilesDir(null)!!.absolutePath + File.separator + "clfilter"
+            val fileName = "highStar.txt"
+            val selectAll =
+                DbHelper.getInstance(this@MainActivity).database().onlineBeanDao().selectAll()
+            val sb = StringBuffer()
+            selectAll.forEach {
+                sb.append(it.name)
+                    .append(", ")
+                    .append(it.comments)
+                    .append(", ")
+                    .append(it.url)
+                    .append("\n")
+            }
+            val result = FileUtil.writeTXT(path, fileName, sb.toString())
+            if (result) {
+                launch (Dispatchers.Main){
+                    ToastUtil.s(this@MainActivity, "导出成功")
+                }
+            }
+        }
+    }
+
+    private val REQUEST_EXTERNAL_STORAGE = 1
+    private val PERMISSIONS_STORAGE =
+        arrayOf(
+            "android.permission.READ_EXTERNAL_STORAGE",
+            "android.permission.WRITE_EXTERNAL_STORAGE"
+        )
+
+
+    fun verifyStoragePermissions() {
+        try {
+            //检测是否有写的权限
+            val permission = ActivityCompat.checkSelfPermission(
+                this,
+                "android.permission.WRITE_EXTERNAL_STORAGE"
+            );
+            if (permission != PackageManager.PERMISSION_GRANTED) {
+                // 没有写的权限，去申请写的权限，会弹出对话框
+                ActivityCompat.requestPermissions(
+                    this,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+                );
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }
+
