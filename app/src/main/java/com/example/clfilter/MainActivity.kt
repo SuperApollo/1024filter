@@ -62,7 +62,9 @@ class MainActivity : BaseActivity() {
                 "取消"
             ) { _, _ -> Log.d(TAG, "取消") }
             .setPositiveButton("确定") { _, _ ->
-                DbHelper.getInstance(this).database().onlineBeanDao().deleteAll()
+                GlobalScope.launch(Dispatchers.IO) {
+                    DbHelper.getInstance(this@MainActivity).database().onlineBeanDao().deleteAll()
+                }
             }.create()
         dialog.show()
         return true
