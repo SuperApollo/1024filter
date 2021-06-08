@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_layout.view.*
 
 class MyAdapter(
-    private val onItemLongClickListener: OnItemLongClickListener? = null,
+    private var onItemLongClickListener: ItemLongClickListener? = null,
     var onlineBeans: MutableList<OnlineBean>
 ) : RecyclerView.Adapter<MyViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
@@ -23,8 +23,9 @@ class MyAdapter(
         val onlineBean = onlineBeans[position]
         holder.itemView.tv_item_name.text = onlineBean.name + "   评论:${onlineBean.comments}"
         holder.itemView.tv_item_response_count.text = onlineBean.comments
-        holder.itemView.setOnClickListener {
+        holder.itemView.setOnLongClickListener {
             onItemLongClickListener?.onItemLongClick(position, onlineBean)
+            true
         }
     }
 }
