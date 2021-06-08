@@ -2,23 +2,27 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:paddingVertical="5dp">
+    android:orientation="vertical"
+    android:paddingHorizontal="5dp">
 
     <TextView
         android:id="@+id/tv_item_name"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp" />
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/tv_item_response_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
+    <TextView
+        android:id="@+id/tv_item_create_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
     <View
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/cardview_dark_background" />
+        android:layout_height="0.5dp"
+        android:background="@color/divider" />
 
 </LinearLayout>

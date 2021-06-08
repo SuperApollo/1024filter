@@ -10,6 +10,7 @@ import android.widget.Button
 import androidx.core.widget.addTextChangedListener
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.clfilter.db.DbConstant
 import com.example.clfilter.db.DbHelper
 import com.example.clfilter.network.Params
 import kotlinx.android.synthetic.main.fragment_first.*
@@ -30,8 +31,8 @@ class SecondFragment : BaseFragment(), ItemLongClickListener {
     private var showErrorTime = 0
     private var run = true
     override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_second, container, false)
@@ -69,6 +70,7 @@ class SecondFragment : BaseFragment(), ItemLongClickListener {
             refreshData(false)
             swipe.isRefreshing = false
         }
+        getLocalData()
     }
 
     override fun onDestroy() {
@@ -76,6 +78,20 @@ class SecondFragment : BaseFragment(), ItemLongClickListener {
         release()
     }
 
+    private fun getLocalData() {
+        GlobalScope.launch(Dispatchers.IO) {
+            //获取本地记录
+            val savedList = DbHelper.getInstance(context).database().onlineBeanDao().selectAllByType(DbConstant.TYPE_ONLINE_CHAT)
+            if (savedList.isNotEmpty()) {
+                onlineBeans.clear()
+                onlineBeans.addAll(savedList)
+                launch(Dispatchers.Main) {
+                    myAdapter.notifyDataSetChanged()
+                    tv_total_item?.text = "历史记录：${onlineBeans.size}条"
+                }
+            }
+        }
+    }
     private fun refreshData(add: Boolean) {
         release()
         if (!add) {
@@ -85,6 +101,7 @@ class SecondFragment : BaseFragment(), ItemLongClickListener {
         refreshShow()
         getData()
     }
+
     private fun release() {
         run = false
         if (getDataJob == null) {
@@ -95,6 +112,7 @@ class SecondFragment : BaseFragment(), ItemLongClickListener {
             getDataJob = null
         }
     }
+
     private fun getData() {
         if (handling.get()) {
             return
@@ -107,19 +125,19 @@ class SecondFragment : BaseFragment(), ItemLongClickListener {
                     .get()
                     .body()
                 val indexMain = index.getElementById("main")
-                val child = indexMain.child(1)
-                val cate1 = child.getElementById("cate_1")//主页
-                val onlineVideo = cate1.child(8)//在线yp板块
-                val target = onlineVideo.child(1).allElements
-                val topics = onlineVideo.child(2).getElementsByClass("f12")
-                val articles = onlineVideo.child(3).getElementsByClass("f12")
+                val child = indexMain.child(2)
+                val cate1 = child.getElementById("cate_6")//主页
+                val chatOnline = cate1.child(0)//技术讨论板块
+                val target = chatOnline.child(1).allElements
+                val topics = chatOnline.child(2).getElementsByClass("f12")
+                val articles = chatOnline.child(3).getElementsByClass("f12")
                 launch(Dispatchers.Main) {
                     tv_info?.text = "主题: ${topics.text()}, 文章: ${articles.text()}"
                 }
                 val link = target.select("a").first()
                 val absHref = link.attr("abs:href")
                 run = true
-                parseOnlineVideoPage(absHref)
+                parseChatOnlinePage(absHref)
                 launch(Dispatchers.Main) { progress?.visibility = View.GONE }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -143,7 +161,7 @@ class SecondFragment : BaseFragment(), ItemLongClickListener {
         }
     }
 
-    private suspend fun parseOnlineVideoPage(absHref: String) {
+    private suspend fun parseChatOnlinePage(absHref: String) {
         while (run) {
             if (getDataJob == null || getDataJob!!.isCancelled) {
                 break
@@ -201,6 +219,7 @@ class SecondFragment : BaseFragment(), ItemLongClickListener {
                     continue
                 }
                 val tal = firstItem.child(1)
+                val time = firstItem.child(2).child(1).text()
                 val responseCount = firstItem.child(3).text().toInt()
                 Log.d("apollo", "responseCount: $responseCount")
                 if (responseCount < Params.commentsLimit) {
@@ -217,6 +236,8 @@ class SecondFragment : BaseFragment(), ItemLongClickListener {
                 onlineBean.name = name
                 onlineBean.url = url
                 onlineBean.comments = responseCount.toString()
+                onlineBean.type = DbConstant.TYPE_ONLINE_CHAT
+                onlineBean.createTime = time
                 if (onlineBeans.contains(onlineBean)) {
                     continue
                 }
@@ -237,6 +258,7 @@ class SecondFragment : BaseFragment(), ItemLongClickListener {
         }
 
     }
+
     private fun refreshShow() {
         myAdapter.notifyDataSetChanged()
         tv_total_item?.text = "共搜索到 ${onlineBeans.size} 条数据,第 $currentPage 页"

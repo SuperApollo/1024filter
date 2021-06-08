@@ -6,6 +6,7 @@ import androidx.room.Room
 class DbHelper private constructor(context: Context) {
     private var myDatabase: MyDatabase =
         Room.databaseBuilder(context.applicationContext, MyDatabase::class.java, DbConstant.DB_NAME)
+            .addMigrations(MIGRATION_1_2)
             .build()
 
     fun database(): MyDatabase {

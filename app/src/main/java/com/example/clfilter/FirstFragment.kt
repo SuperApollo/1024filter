@@ -16,6 +16,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.clfilter.db.DbConstant
 import com.example.clfilter.db.DbHelper
 import com.example.clfilter.network.Params
 import kotlinx.android.synthetic.main.fragment_first.*
@@ -93,7 +94,8 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener, ItemLongClickList
     private fun getLocalData() {
         GlobalScope.launch(Dispatchers.IO) {
             //获取本地记录
-            val savedList = DbHelper.getInstance(context).database().onlineBeanDao().selectAll()
+            val savedList = DbHelper.getInstance(context).database().onlineBeanDao()
+                .selectAllByType(DbConstant.TYPE_ONLINE_VIDEO)
             if (savedList.isNotEmpty()) {
                 onlineBeans.clear()
                 onlineBeans.addAll(savedList)
@@ -211,6 +213,7 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener, ItemLongClickList
                     continue
                 }
                 val tal = firstItem.child(1)
+                val time = firstItem.child(2).child(1).text()
                 val responseCount = firstItem.child(3).text().toInt()
                 Log.d("apollo", "responseCount: $responseCount")
                 if (responseCount < Params.commentsLimit) {
@@ -227,6 +230,8 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener, ItemLongClickList
                 onlineBean.name = name
                 onlineBean.url = url
                 onlineBean.comments = responseCount.toString()
+                onlineBean.type = DbConstant.TYPE_ONLINE_VIDEO
+                onlineBean.createTime = time
                 if (onlineBeans.contains(onlineBean)) {
                     continue
                 }

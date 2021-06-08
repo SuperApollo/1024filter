@@ -5,7 +5,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 val MIGRATION_1_2 = object : Migration(1, 2) {
     override fun migrate(database: SupportSQLiteDatabase) {
-        database.execSQL("update smart_record set type = 'BS' where busType is null")
+        database.execSQL("ALTER TABLE online_bean ADD COLUMN 'createTime' TEXT")
+        database.execSQL("ALTER TABLE online_bean ADD COLUMN 'type' TEXT")
     }
 }
 

@@ -21,8 +21,9 @@ class MyAdapter(
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val onlineBean = onlineBeans[position]
-        holder.itemView.tv_item_name.text = onlineBean.name + "   评论:${onlineBean.comments}"
-        holder.itemView.tv_item_response_count.text = onlineBean.comments
+        holder.itemView.tv_item_name.text = onlineBean.name
+        holder.itemView.tv_item_response_count.text = "评论数:${onlineBean.comments}"
+        holder.itemView.tv_item_create_time.text = "发布时间:${onlineBean.createTime}"
         holder.itemView.setOnLongClickListener {
             onItemLongClickListener?.onItemLongClick(position, onlineBean)
             true
