@@ -1,9 +1,13 @@
 package com.example.clfilter
 
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
 import android.os.FileUtils
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.core.app.ActivityCompat
@@ -17,7 +21,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 class MainActivity : BaseActivity() {
-
+    private val TAG = "MainActivity"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -46,8 +50,22 @@ class MainActivity : BaseActivity() {
                 exportTxt()
                 true
             }
+            R.id.action_clear_local -> clearLocalData()
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun clearLocalData(): Boolean {
+        val builder = AlertDialog.Builder(this)
+        val dialog = builder.setTitle("确定要清除本地记录吗？")
+            .setNegativeButton(
+                "取消"
+            ) { _, _ -> Log.d(TAG, "取消") }
+            .setPositiveButton("确定") { _, _ ->
+                DbHelper.getInstance(this).database().onlineBeanDao().deleteAll()
+            }.create()
+        dialog.show()
+        return true
     }
 
     private fun exportTxt() {
@@ -68,7 +86,7 @@ class MainActivity : BaseActivity() {
             }
             val result = FileUtil.writeTXT(path, fileName, sb.toString())
             if (result) {
-                launch (Dispatchers.Main){
+                launch(Dispatchers.Main) {
                     ToastUtil.s(this@MainActivity, "导出成功")
                 }
             }
@@ -83,7 +101,7 @@ class MainActivity : BaseActivity() {
         )
 
 
-    fun verifyStoragePermissions() {
+    private fun verifyStoragePermissions() {
         try {
             //检测是否有写的权限
             val permission = ActivityCompat.checkSelfPermission(

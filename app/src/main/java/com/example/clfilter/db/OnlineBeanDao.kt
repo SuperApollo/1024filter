@@ -20,6 +20,9 @@ abstract class OnlineBeanDao {
     @Query("select * from online_bean")
     abstract fun selectAll(): List<OnlineBean>
 
+    @Query("delete from online_bean")
+    abstract fun deleteAll()
+
     @Transaction
     open fun saveOrUpdate(onlineBean: OnlineBean) {
         val onlineBeanEntity = selectByUrl(onlineBean.url!!)
