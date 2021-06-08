@@ -11,4 +11,15 @@ data class OnlineBean(
     var name: String? = null,
     var url: String? = null,
     var comments: String? = null
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (other === this) {
+            return true
+        }
+        if (other == null || other !is OnlineBean) {
+            return false
+        }
+
+        return name == other.name && url == other.url && comments == other.comments
+    }
+}

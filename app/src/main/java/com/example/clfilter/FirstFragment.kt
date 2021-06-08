@@ -146,9 +146,6 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
         GlobalScope.launch(Dispatchers.IO) {
             //获取本地记录
             val savedList = DbHelper.getInstance(context).database().onlineBeanDao().selectAll()
-            savedList.forEach {
-                Log.d("apollo", "id:$it.id")
-            }
             if (savedList.isNotEmpty()) {
                 onlineBeans.addAll(savedList)
                 launch(Dispatchers.Main) {
@@ -281,8 +278,10 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener {
                 onlineBean.name = name
                 onlineBean.url = url
                 onlineBean.comments = responseCount.toString()
+                if (onlineBeans.contains(onlineBean)) {
+                    continue
+                }
                 onlineBeans.add(onlineBean)
-                onlineBeans.toSet().toMutableList()
                 onlineBeans.sortBy { it.comments }
                 onlineBeans.reverse()
                 DbHelper.getInstance(context).database().onlineBeanDao().saveOrUpdate(onlineBean)
