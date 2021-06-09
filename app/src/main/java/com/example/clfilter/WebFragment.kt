@@ -26,27 +26,32 @@ class WebFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val url = arguments?.getString(Constants.BUNDLE_TAG_WEB_URL)
-        web.webViewClient = (object : WebViewClient() {
-            @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-            override fun shouldOverrideUrlLoading(
-                view: WebView?,
-                request: WebResourceRequest?
-            ): Boolean {
-                web.loadUrl(request?.url!!.toString())
-                return true
-            }
+        val innerShow = arguments?.getBoolean(Constants.BUNDLE_TAG_INNERSHOW, true) ?: true
+        if (innerShow) {
+            web.webViewClient = (object : WebViewClient() {
+                @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): Boolean {
+                    web.loadUrl(request?.url!!.toString())
+                    return true
+                }
 
-            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-                view?.loadUrl(url)
-                return true
-            }
-        })
-        web.settings.useWideViewPort = true
-        web.settings.layoutAlgorithm = WebSettings.LayoutAlgorithm.SINGLE_COLUMN
-        web.settings.loadWithOverviewMode = true
-        web.settings.setSupportZoom(true)
-        web.settings.builtInZoomControls = true
-        web.settings.displayZoomControls = false
+                override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                    view?.loadUrl(url)
+                    return true
+                }
+            })
+            web.settings.useWideViewPort = true
+            web.settings.layoutAlgorithm = WebSettings.LayoutAlgorithm.SINGLE_COLUMN
+            web.settings.loadWithOverviewMode = true
+            web.settings.setSupportZoom(true)
+            web.settings.builtInZoomControls = true
+            web.settings.displayZoomControls = false
+            web.settings.javaScriptEnabled = true
+        }
+
         web.loadUrl(url)
     }
 

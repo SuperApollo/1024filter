@@ -276,7 +276,10 @@ class SecondFragment : BaseFragment(), ItemClickListener {
     override fun onItemClick(position: Int, bean: OnlineBean) {
         findNavController().navigate(
             R.id.action_SecondFragment_to_WebFragment,
-            bundleOf(Constants.BUNDLE_TAG_WEB_URL to bean.url)
+            bundleOf(
+                Constants.BUNDLE_TAG_WEB_URL to bean.url,
+                Constants.BUNDLE_TAG_INNERSHOW to true
+            )
         )
     }
 }
