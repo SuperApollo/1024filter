@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -275,7 +276,10 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener, ItemClickListener
     }
 
     override fun onItemClick(position: Int, bean: OnlineBean) {
-
+        findNavController().navigate(
+            R.id.action_FirstFragment_to_WebFragment,
+            bundleOf(Constants.BUNDLE_TAG_WEB_URL to bean.url)
+        )
     }
 
 }

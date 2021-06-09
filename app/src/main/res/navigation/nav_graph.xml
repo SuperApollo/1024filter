@@ -17,6 +17,9 @@
         <action
             android:id="@+id/action_FirstFragment_to_errorPageFragment"
             app:destination="@id/errorPageFragment" />
+        <action
+            android:id="@+id/action_FirstFragment_to_WebFragment"
+            app:destination="@+id/WebFragment" />
     </fragment>
     <fragment
         android:id="@+id/SecondFragment"
