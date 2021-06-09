@@ -28,9 +28,6 @@
         tools:layout="@layout/fragment_second">
 
         <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/FirstFragment" />
-        <action
             android:id="@+id/action_SecondFragment_to_WebFragment"
             app:destination="@+id/WebFragment" />
     </fragment>
@@ -38,14 +35,7 @@
         android:id="@+id/WebFragment"
         android:name="com.example.clfilter.WebFragment"
         android:label="@string/web_fragment_label"
-        tools:layout="@layout/fragment_web">
-        <action
-            android:id="@+id/action_WebFragment_to_SecondFragment"
-            app:destination="@+id/SecondFragment" />
-        <action
-            android:id="@+id/action_WebFragment_to_FirstFragment"
-            app:destination="@+id/FirstFragment" />
-    </fragment>
+        tools:layout="@layout/fragment_web" />
     <fragment
         android:id="@+id/errorPageFragment"
         android:name="com.example.clfilter.ErrorPageFragment"

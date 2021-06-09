@@ -43,7 +43,7 @@ class SecondFragment : BaseFragment(), ItemClickListener {
         super.onViewCreated(view, savedInstanceState)
 
         view.findViewById<Button>(R.id.button_second).setOnClickListener {
-            findNavController().navigate(R.id.action_SecondFragment_to_FirstFragment)
+            findNavController().popBackStack()
         }
 
         myAdapter = MyAdapter(this, onlineBeans)
