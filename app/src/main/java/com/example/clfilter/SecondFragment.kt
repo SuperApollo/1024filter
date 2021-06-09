@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * A simple [Fragment] subclass as the second destination in the navigation.
  */
-class SecondFragment : BaseFragment(), ItemLongClickListener {
+class SecondFragment : BaseFragment(), ItemClickListener {
     private var getDataJob: Job? = null
     private val handling = AtomicBoolean(false)
     private var currentPage = 0
@@ -81,7 +82,8 @@ class SecondFragment : BaseFragment(), ItemLongClickListener {
     private fun getLocalData() {
         GlobalScope.launch(Dispatchers.IO) {
             //获取本地记录
-            val savedList = DbHelper.getInstance(context).database().onlineBeanDao().selectAllByType(DbConstant.TYPE_ONLINE_CHAT)
+            val savedList = DbHelper.getInstance(context).database().onlineBeanDao()
+                .selectAllByType(DbConstant.TYPE_ONLINE_CHAT)
             if (savedList.isNotEmpty()) {
                 onlineBeans.clear()
                 onlineBeans.addAll(savedList)
@@ -92,6 +94,7 @@ class SecondFragment : BaseFragment(), ItemLongClickListener {
             }
         }
     }
+
     private fun refreshData(add: Boolean) {
         release()
         if (!add) {
@@ -268,5 +271,12 @@ class SecondFragment : BaseFragment(), ItemLongClickListener {
         copy(bean.url!!)
         ToastUtil.s(context, "复制成功!")
         vibrate()
+    }
+
+    override fun onItemClick(position: Int, bean: OnlineBean) {
+        findNavController().navigate(
+            R.id.action_SecondFragment_to_WebFragment,
+            bundleOf(Constants.BUNDLE_TAG_WEB_URL to bean.url)
+        )
     }
 }

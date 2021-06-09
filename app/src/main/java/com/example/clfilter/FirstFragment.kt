@@ -1,16 +1,10 @@
 package com.example.clfilter
 
-import android.app.Service
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.os.Bundle
-import android.os.Vibrator
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -29,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
-class FirstFragment : BaseFragment(), OnItemLongClickListener, ItemLongClickListener {
+class FirstFragment : BaseFragment(), OnItemLongClickListener, ItemClickListener {
     private var getDataJob: Job? = null
     private val handling = AtomicBoolean(false)
     private var currentPage = 0
@@ -278,6 +272,10 @@ class FirstFragment : BaseFragment(), OnItemLongClickListener, ItemLongClickList
         copy(bean.url!!)
         ToastUtil.s(context, "复制成功!")
         vibrate()
+    }
+
+    override fun onItemClick(position: Int, bean: OnlineBean) {
+
     }
 
 }
