@@ -51,7 +51,11 @@ class WebFragment : BaseFragment() {
             web.settings.displayZoomControls = false
             web.settings.javaScriptEnabled = true
         }
-
+        btnBack.setOnClickListener {
+            if (web.canGoBack()){
+                web.goBack()
+            }
+        }
         web.loadUrl(url)
     }
 
