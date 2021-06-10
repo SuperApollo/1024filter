@@ -17,4 +17,5 @@
         android:orderInCategory="100"
         android:title="@string/action_clear_local"
         app:showAsAction="never" />
+
 </menu>

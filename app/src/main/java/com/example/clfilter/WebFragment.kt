@@ -1,10 +1,10 @@
 package com.example.clfilter
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -15,6 +15,11 @@ import kotlinx.android.synthetic.main.fragment_web.*
 
 class WebFragment : BaseFragment() {
     private val TAG = "WebFragment"
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -52,11 +57,29 @@ class WebFragment : BaseFragment() {
             web.settings.javaScriptEnabled = true
         }
         btnBack.setOnClickListener {
-            if (web.canGoBack()){
+            if (web.canGoBack()) {
                 web.goBack()
             }
         }
         web.loadUrl(url)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_web_fragment, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_jump_chrome -> goToChrome()
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun goToChrome(): Boolean {
+        val uri = Uri.parse(web.url)
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+        startActivity(intent)
+        return true
     }
 
     override fun onPause() {
